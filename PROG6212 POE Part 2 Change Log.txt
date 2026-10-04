@@ -1,0 +1,82 @@
+PROG6212 POE Part 2 - Change Log
+
+*App Functionality: 
+ The user can add multiple modules for the semester with all the required data. The data is stored in memory.
+ 'The feature is implemented with some bugs'.
+
+ Changes made: Updated the feature in question, big fixes have been made shich allow data entry without issue.
+
+*App functionality: 
+ The user can enter the number of weeks and start date for the first week, and this is stored in memory.
+ 'The feature is implemented with some bugs'.
+
+ Changes made: Updated the feature in question, this data will be stored in the SQL Database.
+
+*App functionality: 
+ The list of modules is displayed to the user.
+ 'The feature is implemented with some bugs'.
+
+ Changes made: Updated the feature in question.
+
+*App functionality: 
+ The hours per week is correctly calculated and displayed to the user.
+ 'The feature is implemented with some bugs'.
+
+ Changes made: Updated the feature in question, the necessary calculatiuons corrections have been made to the sum.
+
+*The user can record hours spent on a module and this is stored in memory.
+ 'The feature is implemented with some bugs'.
+ 
+ Changes made: Updated the feature in question, this data will be stored in the SQL Database as is needed.
+
+*App functionality: 
+ The remaining hours for the week are correctly calculated and displayed to the user.
+ 'The feature is implemented with some bugs'.
+
+ Changes made: Updated the feature in question, any and all calculation errors have been fixed.
+
+*Usability: 
+ The user interface is easy to use.
+ 'The user interface can be used but is not very logical.
+ Feedback:
+ Does not include a user interface, only submitted a .sln file, which cannot run on its own'.
+
+ Changes made: Attempted to re-create the User Interface and export it, the interface should now be accessible to the user.
+
+*Application Structure: 
+ The application makes use of LINQ.
+ 'LINQ is used with some issues in the implementation.
+ Feedback:
+ Does not use LINQ'.
+
+ Changes made: I recreated the Database I needed to create for this assignment, I have made use of LINQ wherever I could find use of it.
+
+*Application Structure: 
+ A custom class library was created.
+ 'A custom class library with some classes was created and is used by the application, but there are some issues'.
+
+ Changes made: I fixed some of the techinical issues associate with it.
+
+*Coding Standards: 
+ The code is well structured and documented.
+ 'Code structure can be somewhat improved or too few comments included'.
+
+ Changes made: I made the some updates to the code and included more descriptive comments as well as removed any redundant code or information.
+
+*Documentation: 
+ UML diagram accurately reflects the class structure.
+ 'A good diagram with only one or two mistakes'.
+
+ Changes made: I re-created the UML with better strcuture, while updating the classes and providing explanations made to the diagram.
+
+*Documentation: 
+ The readme file provides enough information to run the app.
+ 'The readme file presents most of the information about running the app but could be more detailed'.
+
+ Changes made: I updated the Readme file with more details regarding running the updated WPF Application and how to use the new SQL Database.
+
+*Other Marks: 
+ Advanced features not covered in class (Bonus Marks).
+ 'No advanced features were used. Minimal use of advanced features'.
+
+ Changes made: I aded advanced features to help inprove my program overall, I used WPF features that I felt were the most useful for my program's needs.

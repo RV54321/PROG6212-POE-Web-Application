@@ -1,0 +1,323 @@
+MainWindows.xaml:
+using System;
+using System.Collections.Generic;
+using System.Linq; /* must implement for POE Part 1 Rubric*/
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Data;
+using System.Windows.Documents;
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using System.Windows.Navigation;
+using System.Windows.Shapes;
+using System.Reflection;
+using System.Data.SqlClient;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.IO;
+using Part_1_Class_Library;
+//PROG6212 POE Part 2 - WPF Application
+//Holds all code used in the WPF 'User Interface', which communicate with the Class Library
+
+namespace PROG6212_POE_Part_1_WPF_and_Class_Library
+{
+    /// <summary>
+    /// Interaction logic for MainWindow.xaml
+    /// </summary>
+    public partial class MainWindow : Window
+    {
+        //Connects to databse
+        public const String conn = "Data Source=ML-RefVm-631348\\SQLEXPRESS;Initial Catalog=PROG6212POEPart2;Integrated Security=True";
+
+        //These strings store the user name and password for the 'Login' and 'Register' procedures
+        private string username;
+        private string password;
+        List<int> hours = new List<int>();
+
+        //Allows for storage of the password Hash '#', used in 'Login' and 'Register'
+        UtilityClass UC = new UtilityClass();
+        public MainWindow()
+        {
+            InitializeComponent();
+        }
+
+        //DATA ENTRIES - Heading 1
+        //This is where a User will input relevant Module details that would be used for data recording and calculation later in the program
+        
+        //This button saves the data entered by the User
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            string mcode = code.Text;
+            string mname = name.Text;
+            int mcredits = int.Parse(credits.Text);
+            int mclasshours = int.Parse(classhours.Text);
+            int mweeks = int.Parse(weeks.Text);
+            DateTime mstart = DateTime.Parse(startdate.Text);
+            //Change if statment
+            if (code.Text.Length <= 0 || name.Text.Length <= 0 || credits.Text.Length <= 0 || classhours.Text.Length <= 0 || weeks.Text.Length <= 0 ||
+                startdate.Text.Length <= 0)
+            {
+                MessageBox.Show("Enter All Values");
+            }
+            else
+            {
+                string password = txtpassword.Text.ToString();
+                try
+                {
+                    //Add the new user to the databse
+                    using (SqlConnection connection = new SqlConnection(conn))
+                    {
+                        SqlCommand command = new SqlCommand("INSERT INTO moduledetails " + "VALUES(@mcode, @mname, @mcredits, @mclasshours, @mweeks, @mstart);", connection);
+                        command.Parameters.AddWithValue("@mcode", mcode);
+                        command.Parameters.AddWithValue("@mname", mname);
+                        command.Parameters.AddWithValue("@mcredits", mcredits);
+                        command.Parameters.AddWithValue("@mclasshours", mclasshours);
+                        command.Parameters.AddWithValue("@mweeks", mweeks);
+                        command.Parameters.AddWithValue("@mstart", mstart);
+                        connection.Open();
+                        SqlDataAdapter adapter = new SqlDataAdapter();
+                        adapter.InsertCommand = command;
+                        adapter.InsertCommand.ExecuteScalar();
+                        MessageBox.Show("User has been added to the databse ");
+                        adapter.Dispose();
+                    }
+                }
+                catch (SqlException ex)
+                {
+                    MessageBox.Show(ex.ToString());
+                }
+            }
+        }
+
+            //CALCULATIONS - Heading 2
+            //This is the section of the program where a User will be able to recieve calculations based on thier input data
+            private void List(object sender, TextChangedEventArgs e)
+            {
+                //Displays a list of the modules with the number of hours of self‐study that is required for each module per week
+
+                string mname = name.Text;
+                int mcredits = int.Parse(credits.Text);
+                int mclasshours = int.Parse(classhours.Text);
+                int mweeks = int.Parse(weeks.Text);
+
+                int mselfstudy = ((mcredits * 10) / mweeks) - mclasshours;//Calculation
+                selfstudy.Text = mselfstudy.ToString();
+            }
+            private void Selfstudy(object sender, TextChangedEventArgs e)
+            {
+                int hoursremain = (int.Parse(selfstudy.Text));
+                for (int i = 0; i < hours.Count; i++)
+                {
+                    hoursremain -= hours[i];
+                }
+                hoursremaining.Text = hoursremain.ToString();
+            }
+
+            //This button calculates the Module List's Self-study Hours
+            private void Button_Click_1(object sender, RoutedEventArgs e)
+            {
+                //List
+                string mname = name.Text;
+                int mcredits = int.Parse(credits.Text);
+                int mclasshours = int.Parse(classhours.Text);
+                int mweeks = int.Parse(weeks.Text);
+
+                int mselfstudy = ((mcredits * 10) / mweeks) - mclasshours;//Calculation
+                selfstudy.Text = mselfstudy.ToString();
+            }
+
+            //This button calculates Self-study hours Remaining after deduction
+            private void Button_Click_2(object sender, RoutedEventArgs e)
+            {
+                hours.Add(int.Parse(hoursspent.Text));
+
+                int hoursremain = (int.Parse(selfstudy.Text));
+                for (int i = 0; i < hours.Count; i++)
+                {
+                    hoursremain -= hours[i];
+                }
+                hoursremaining.Text = hoursremain.ToString();
+            }
+            //'Login' Function
+            //This is so users can access an already established account in the program system
+            private void Login_Click(object sender, RoutedEventArgs e)
+            {
+                //Catches if the User has not entered enough details for 'Login'
+                if (txtpassword.Text.Length <= 0 || txtusername.Text.Length <= 0)
+                {
+                    MessageBox.Show("Enter All Values");
+                }
+                else
+                {
+                //Stores the Hash of the enterd password
+                string password = UC.EncryptData(txtpassword.Text);
+                try
+                    {
+                        using (SqlConnection connection = new SqlConnection(conn))
+                        {
+                            connection.Open();
+                            String sql = "SELECT* FROM users where username = '" + txtusername.Text + "' " + "AND password = '" + password + "';";
+                            SqlCommand command = new SqlCommand(sql, connection);
+                            SqlDataReader reader = command.ExecuteReader();
+                            if (reader.HasRows)
+                            {
+                                MessageBox.Show("Success");
+                                TabHome.Visibility = Visibility.Visible;
+                            }
+                            else
+                            {
+                                MessageBox.Show("Invalid Credentials");
+                            }
+                            reader.Close();
+                            command.Dispose();
+                        }
+                    }
+                    catch (SqlException ex)
+                    {
+                        MessageBox.Show(ex.ToString());
+                    }
+                    Console.ReadLine();
+
+                }
+            }
+            //'Register' Function
+            //Occurs during the first time a user acceses this program's system, they create a new account
+            private void Register_Click(object sender, RoutedEventArgs e)
+            {
+                register.IsSelected = true;
+            }
+            //Completes the registration procedure
+            private void ok_Click(object sender, RoutedEventArgs e)
+            {
+                if (txtpass.Text.Length <= 0 || txtname.Text.Length <= 0)
+                {
+                    MessageBox.Show("Enter All Values");
+                }
+                else
+                {
+                //Storing the Hash of the entered passwords
+                StreamWriter write = new StreamWriter("POEPart2.sql");
+                string password = UC.EncryptData(txtpass.Text);
+                    try
+                    {
+                        //add the new user to the databse
+                        using (SqlConnection connection = new SqlConnection(conn))
+                        {
+                            SqlCommand command = new SqlCommand("INSERT INTO users " + "VALUES(@username, @password);", connection);
+                            command.Parameters.AddWithValue("@username", txtname.Text);
+                            command.Parameters.AddWithValue("@password", password);
+                            connection.Open();
+                            SqlDataAdapter adapter = new SqlDataAdapter();
+                            adapter.InsertCommand = command;
+                            adapter.InsertCommand.ExecuteScalar();
+                            MessageBox.Show("User has been added to the databse ");
+                            adapter.Dispose();
+                        }
+                    }
+                    catch (SqlException ex)
+                    {
+                        MessageBox.Show(ex.ToString());
+                    }
+                }
+            }
+        /*//Redundant Method, must remove later
+        private void txtpassword_TextChanged(object sender, TextChangedEventArgs e)
+        {
+
+        }*/
+    }
+    }
+
+
+ModeulEnter:
+using System;
+using System.Collections.Generic;
+using System.Text;
+using System.Reflection;
+//PROG6212 POE Part 2 - Class Library
+//Holds all the classes that the WPF will use under its 'DATA ENTRIES' Heading
+//Holds Get and Set of variables
+
+namespace Part_1_Class_Library
+{
+    public class ModuleEnter
+    {
+        //Variables
+        //'DATA ENTRIES'
+        public String mcode { get; set; }
+        public String mname { get; set; }
+        public int mcredits { get; set; }
+        public int mclasshours { get; set; }
+        public DateTime Mstart { get; set; }
+        //Number of weeks
+        public int mweeks { get; set; }
+        //Start date of first week
+        public DateTime mstart { get; set; }
+
+        //'CALCULATIONS'
+        public int mselfstudy { get; set; }
+    }
+}
+
+ModuleCalc:
+using System;
+using System.Collections.Generic;
+using System.Text;
+//PROG6212 POE Part 2 - Class Library
+//Holds all the classes that the WPF will use under its 'CALCULATIONS' Heading
+//Holds Get and Set of variables
+
+namespace Part_1_Class_Library
+{
+    class ModuleCalc
+    {
+        //Varaibles
+        public int mhoursspent { get; set; }
+        public string mmodule { get; set; }
+        public DateTime mcertaindate { get; set; }
+    }
+ }
+
+
+UtilityClass:
+using System;
+using System.Collections.Generic;
+using System.Text;
+using System.Threading.Tasks;
+//PROG6212 POE Part 2 - Class Library
+//This class is used in the 'Login' and 'Regitser procedures, to store the password Hash ('#") using System.Collections.Generic
+
+namespace Part_1_Class_Library
+{
+    public class UtilityClass
+    {
+        public string EncryptData(string password)
+        {
+            //Encrypting method, hashng the password
+            //Adopted here: http://www.dotnetfunda.com/forums/show/16822/decrypt-password-in-aspnet
+
+            string ms = string.Empty;
+            byte[] encode = new byte[password.Length];
+            encode = Encoding.UTF8.GetBytes(password);
+            ms = Convert.ToBase64String(encode);
+            return ms;
+        }
+        public string Decryptdata(string encryptpwd)
+        {
+            //Decryption method
+            string decryptpwd = string.Empty;
+            UTF8Encoding encodepwd = new UTF8Encoding();
+            Decoder Decode = encodepwd.GetDecoder();
+            byte[] todecode_byte = Convert.FromBase64String(encryptpwd);
+            int charCount = Decode.GetCharCount(todecode_byte, 0, todecode_byte.Length);
+            char[] decoded_char = new char[charCount];
+            Decode.GetChars(todecode_byte, 0, todecode_byte.Length, decoded_char, 0);
+            decryptpwd = new String(decoded_char);
+            return decryptpwd;
+        }
+    }
+}
